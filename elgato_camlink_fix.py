@@ -42,7 +42,8 @@ def find_video_settings(v4l2_output: str) -> Tuple[int, int, int]:
         re.match(r"[.\n\t]*Size: Discrete ([0-9]+)x([0-9]+)", x) for x in v4l2_output
     ]
     matches = [(match[1], match[2]) for match in matches if match is not None]
-    assert len(set(matches)) == 1, "resolution not unique"
+    # print(matches)
+    # assert len(set(matches)) == 1, "resolution not unique"
     width, height = int(matches[0][0]), int(matches[0][1])
 
     matches = [
@@ -58,11 +59,12 @@ def find_video_settings(v4l2_output: str) -> Tuple[int, int, int]:
 def setup_loopback() -> None:
     v4l2_output = subprocess.check_output(["v4l2-ctl", "--list-devices"]).decode()
     dummy_device = find_device(v4l2_output, "Dummy video device (0x0000)")
-    elgato_device = find_device(v4l2_output, "Cam Link 4K: Cam Link 4K")
+    elgato_device = find_device(v4l2_output, "Elgato Facecam: Elgato Facecam")
 
     elgato_info = subprocess.check_output(
         ["v4l2-ctl", "--list-formats-ext", "-d", elgato_device]
     ).decode()
+    print(elgato_info)
     width, height, fps = find_video_settings(elgato_info)
 
     pix_fmt = WORKING_INPUT_PIX_FMTS[(width, height)]
